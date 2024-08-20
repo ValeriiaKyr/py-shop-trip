@@ -2,6 +2,7 @@ import json
 import math
 import os
 from datetime import datetime
+from decimal import Decimal
 
 from app.car import Car
 from app.shop import Shop
@@ -16,7 +17,7 @@ class Customer:
             name: str,
             product_cart: dict,
             location: list,
-            money: int,
+            money: Decimal,
             car: Car
     ) -> None:
         self.name = name
@@ -25,8 +26,8 @@ class Customer:
         self.money = money
         self.car = car
 
-    @staticmethod
-    def create_customer() -> None:
+    @classmethod
+    def create_customer(cls) -> None:
         Car.create_car()
         config_path = os.path.join(os.path.dirname(__file__), "config.json")
         with open(config_path, "r") as file_customer:
@@ -110,7 +111,7 @@ class Customer:
         print("See you again!\n")
 
     def custom_at_home(self, money_spent: float) -> None:
-        cost_now = self.money - money_spent
+        cost_now = round(Decimal(self.money) - Decimal(money_spent), 2)
 
         print(f"{self.name} rides home")
         print(f"{self.name} now has {cost_now} dollars\n")

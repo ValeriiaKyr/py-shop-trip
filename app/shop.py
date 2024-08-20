@@ -18,8 +18,8 @@ class Shop:
     def __str__(self) -> str:
         return self.name
 
-    @staticmethod
-    def create_shop() -> None:
+    @classmethod
+    def create_shop(cls) -> None:
         config_path = os.path.join(os.path.dirname(__file__), "config.json")
         with open(config_path, "r") as file_shop:
             data = json.load(file_shop)
