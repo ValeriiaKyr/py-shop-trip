@@ -95,7 +95,8 @@ class Customer:
         total_cost = cost_milk + cost_breads + cost_butter
 
         current_datatime = datetime(2021, 1, 4, 12, 33, 41)
-        print(f"Date: {current_datatime.strftime("%d/%m/%Y %H:%M:%S")}")
+        current_datatime = current_datatime.strftime("%d/%m/%Y %H:%M:%S")
+        print(f"Date: {current_datatime}")
         print(f"Thanks, {self.name}, for your purchase!")
         print("You have bought:")
         print(f"{self.product_cart.get("milk")} milks for {cost_milk} dollars")
