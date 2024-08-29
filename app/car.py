@@ -1,5 +1,7 @@
-import json
-import os
+import math
+
+from app.customer import Customer
+from app.shop import Shop
 
 
 class Car:
@@ -10,16 +12,30 @@ class Car:
         self.brand = brand
         self.fuel_consumption = fuel_consumption
 
-    @staticmethod
-    def create_car() -> None:
-        config_path = os.path.join(os.path.dirname(__file__), "config.json")
-        with open(config_path, "r") as file_cars:
-            data = json.load(file_cars)
+    def distance_to_shop(
+            self,
+            customer: Customer,
+            data: dict,
+            some_shop: Shop
+    ) -> float:
+        fuel_cost = data.get("FUEL_PRICE")
 
-        for customer in data.get("customers", []):
-            cars = customer.get("car", {})
-            car = Car(
-                brand=cars.get("brand"),
-                fuel_consumption=cars.get("fuel_consumption")
-            )
-            Car.cars_dict[customer["name"]] = car
+        distance_c = customer.location
+        distance_sh = some_shop.location
+        distance = round(
+            (math.sqrt(
+                (
+                    (distance_sh[0] - distance_c[0]) ** 2
+                ) + (
+                    (distance_sh[1] - distance_c[1]) ** 2
+                )
+            ) * 2
+            ),
+            2
+        )
+        cost_trip = round(
+            ((distance * self.fuel_consumption) / 100) * fuel_cost,
+            2
+        )
+
+        return cost_trip

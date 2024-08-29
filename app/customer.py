@@ -1,10 +1,8 @@
-import json
-import math
-import os
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
-from app.car import Car
+# from app.car import Car
 from app.shop import Shop
 
 
@@ -18,7 +16,7 @@ class Customer:
             product_cart: dict,
             location: list,
             money: Decimal,
-            car: Car
+            car: Any
     ) -> None:
         self.name = name
         self.product_cart = product_cart
@@ -26,73 +24,15 @@ class Customer:
         self.money = money
         self.car = car
 
-    @classmethod
-    def create_customer(cls) -> None:
-        Car.create_car()
-        config_path = os.path.join(os.path.dirname(__file__), "config.json")
-        with open(config_path, "r") as file_customer:
-            data = json.load(file_customer)
-
-        for custom in data.get("customers", []):
-            customer = Customer(
-                name=custom.get("name"),
-                product_cart=custom.get("product_cart"),
-                location=custom.get("location"),
-                money=custom.get("money"),
-                car=Car.cars_dict[custom.get("name")],
-            )
-            Customer.list_customer.append(customer)
-
-    def distance_to_shop(self, some_shop: Shop) -> float:
-        config_path = os.path.join(os.path.dirname(__file__), "config.json")
-        with open(config_path, "r") as file_cost_fuel:
-            data = json.load(file_cost_fuel)
-
-        fuel_cost = data.get("FUEL_PRICE")
-
-        distance_c = self.location
-        distance_sh = some_shop.location
-        distance = round(
-            (math.sqrt(
-                (
-                    (distance_sh[0] - distance_c[0]) ** 2
-                ) + (
-                    (distance_sh[1] - distance_c[1]) ** 2
-                )
-            ) * 2
-            ),
-            2
-        )
-        cost_trip = round(
-            ((distance * self.car.fuel_consumption) / 100) * fuel_cost,
-            2
-        )
-
-        return cost_trip
-
-    def will_cost(self, one_shop: Shop) -> float:
-
-        cost_milk = (self.product_cart.get("milk")
-                     * one_shop.products.get("milk"))
-        cost_breads = (self.product_cart.get("bread")
-                       * one_shop.products.get("bread"))
-        cost_butter = (self.product_cart.get("butter")
-                       * one_shop.products.get("butter"))
-        total_cost = cost_milk + cost_breads + cost_butter
-
+    def will_cost(self, one_shop: Shop) -> list[float]:
+        total_cost = []
+        for product, count in self.product_cart.items():
+            price_per_unit = one_shop.products.get(product)
+            total_cost.append(count * price_per_unit)
         return total_cost
 
     def create_check(self, one_shop: Shop) -> None:
-        cost_milk = (self.product_cart.get("milk")
-                     * one_shop.products.get("milk"))
-        cost_breads = (self.product_cart.get("bread")
-                       * one_shop.products.get("bread"))
-        if cost_breads == int(cost_breads):
-            cost_breads = int(cost_breads)
-
-        cost_butter = (self.product_cart.get("butter")
-                       * one_shop.products.get("butter"))
-        total_cost = cost_milk + cost_breads + cost_butter
+        total_cost = self.will_cost(one_shop)
 
         current_datatime = datetime(2021, 1, 4, 12, 33, 41)
         current_datatime = current_datatime.strftime("%d/%m/%Y %H:%M:%S")
@@ -102,16 +42,18 @@ class Customer:
         print(f"Date: {current_datatime}")
         print(f"Thanks, {self.name}, for your purchase!")
         print("You have bought:")
-        print(f"{milk} milks for {cost_milk} dollars")
+        print(f"{milk} milks for {total_cost[0]} dollars")
+        if total_cost[1] == int(total_cost[1]):
+            total_cost[1] = int(total_cost[1])
         print(
             f"{bread} "
-            f"breads for {cost_breads} dollars"
+            f"breads for {total_cost[1]} dollars"
         )
         print(
             f"{butter} "
-            f"butters for {cost_butter} dollars"
+            f"butters for {total_cost[2]} dollars"
         )
-        print(f"Total cost is {total_cost} dollars")
+        print(f"Total cost is {sum(total_cost)} dollars")
         print("See you again!\n")
 
     def custom_at_home(self, money_spent: float) -> None:
